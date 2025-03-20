@@ -1,0 +1,63 @@
+package com.tuneup.backend.controllers;
+
+import com.tuneup.backend.models.Users;
+import com.tuneup.backend.payload.request.LoginRequest;
+import com.tuneup.backend.payload.request.SignupRequest;
+import com.tuneup.backend.payload.response.MessageResponse;
+import com.tuneup.backend.secutiry.services.UserDetailsImpl;
+import com.tuneup.backend.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin
+public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+    private final UserService userService;
+
+    private PasswordEncoder encoder;
+
+    @Autowired
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.encoder = passwordEncoder;
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
+        logger.info("✅ Login method called with username: {}", loginRequest.getUsername());
+
+        UserDetailsImpl verifiedRequest = userService.verify(loginRequest);
+
+        if (verifiedRequest == null) {
+            logger.warn("❌ Login failed for username: {}", loginRequest.getUsername());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
+
+        return ResponseEntity.ok(verifiedRequest);
+    }
+
+    @PostMapping("/registration")
+    public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
+        //TODO: Добавить проаверку на сущ. польз. по username и по email.
+        //TODO: Настроить правильно валидацию email
+        //TODO: Подумать как красиво написать создание обьекта user(46 строка)
+
+        Users user = new Users(signupRequest.getUsername(),
+                signupRequest.getEmail(),
+                encoder.encode(signupRequest.getPassword()));
+
+        userService.createUser(user);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+}
