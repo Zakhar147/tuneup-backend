@@ -21,13 +21,7 @@ public class UserService {
 
     private final UserRepo userRepo;
 
-    private final PasswordEncoder encoder;
-
     private final AuthenticationManager authenticationManager;
-
-    public Optional<Users> findByUsername(String username) {
-        return userRepo.findByUsername(username);
-    }
 
     public List<Users> getAllUsers() {
         return userRepo.findAll();

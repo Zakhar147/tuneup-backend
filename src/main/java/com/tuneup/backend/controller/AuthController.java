@@ -22,9 +22,9 @@ public class AuthController {
 
     private final UserService userService;
 
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
     @Autowired
     public AuthController(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
@@ -35,8 +35,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        //TODO: Добавить jwt
-
         UserDetailsImpl verifiedResponse = userService.verify(loginRequest);
         String jwt = jwtService.generateJwt(loginRequest.getUsername());
 
@@ -49,7 +47,6 @@ public class AuthController {
                     verifiedResponse.getUsername(),
                     verifiedResponse.getEmail()));
         }
-
     }
 
     @PostMapping("/registration")
