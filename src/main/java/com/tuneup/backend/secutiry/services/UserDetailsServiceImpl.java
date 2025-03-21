@@ -1,7 +1,7 @@
 package com.tuneup.backend.secutiry.services;
 
-import com.tuneup.backend.models.Users;
-import com.tuneup.backend.repos.UserRepo;
+import com.tuneup.backend.model.Users;
+import com.tuneup.backend.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

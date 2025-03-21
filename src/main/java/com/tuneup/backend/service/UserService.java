@@ -1,12 +1,10 @@
-package com.tuneup.backend.services;
+package com.tuneup.backend.service;
 
-import com.tuneup.backend.models.Users;
+import com.tuneup.backend.model.Users;
 import com.tuneup.backend.payload.request.LoginRequest;
-import com.tuneup.backend.repos.UserRepo;
-import com.tuneup.backend.secutiry.services.JwtService;
+import com.tuneup.backend.repo.UserRepo;
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,22 +16,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-
+@RequiredArgsConstructor
 public class UserService {
 
-    private UserRepo userRepo;
+    private final UserRepo userRepo;
 
-    private AuthenticationManager authenticationManager;
+    private final PasswordEncoder encoder;
 
-    private JwtService jwtService;
-
-    @Autowired
-    public UserService(UserRepo userRepo, AuthenticationManager authenticationManager, JwtService jwtService) {
-        this.userRepo = userRepo;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-    }
-
+    private final AuthenticationManager authenticationManager;
 
     public Optional<Users> findByUsername(String username) {
         return userRepo.findByUsername(username);
@@ -49,7 +39,7 @@ public class UserService {
 
     public UserDetailsImpl verify(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

@@ -1,4 +1,4 @@
-package com.tuneup.backend.models;
+package com.tuneup.backend.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

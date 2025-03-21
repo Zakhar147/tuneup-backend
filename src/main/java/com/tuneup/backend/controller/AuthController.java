@@ -1,49 +1,55 @@
-package com.tuneup.backend.controllers;
+package com.tuneup.backend.controller;
 
-import com.tuneup.backend.models.Users;
+import com.tuneup.backend.model.Users;
 import com.tuneup.backend.payload.request.LoginRequest;
 import com.tuneup.backend.payload.request.SignupRequest;
+import com.tuneup.backend.payload.response.JwtResponse;
 import com.tuneup.backend.payload.response.MessageResponse;
+import com.tuneup.backend.repo.UserRepo;
+import com.tuneup.backend.secutiry.services.JwtService;
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
-import com.tuneup.backend.services.UserService;
+import com.tuneup.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
     private final UserService userService;
+
+    private JwtService jwtService;
 
     private PasswordEncoder encoder;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userService = userService;
         this.encoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        logger.info("✅ Login method called with username: {}", loginRequest.getUsername());
+        //TODO: Добавить jwt
 
-        UserDetailsImpl verifiedRequest = userService.verify(loginRequest);
+        UserDetailsImpl verifiedResponse = userService.verify(loginRequest);
+        String jwt = jwtService.generateJwt(loginRequest.getUsername());
 
-        if (verifiedRequest == null) {
-            logger.warn("❌ Login failed for username: {}", loginRequest.getUsername());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        if (verifiedResponse == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.ok(new JwtResponse(
+                    jwt,
+                    verifiedResponse.getId(),
+                    verifiedResponse.getUsername(),
+                    verifiedResponse.getEmail()));
         }
 
-        return ResponseEntity.ok(verifiedRequest);
     }
 
     @PostMapping("/registration")

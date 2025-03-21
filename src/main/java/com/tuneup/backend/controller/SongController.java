@@ -1,7 +1,7 @@
-package com.tuneup.backend.controllers;
+package com.tuneup.backend.controller;
 
-import com.tuneup.backend.models.Song;
-import com.tuneup.backend.services.SongService;
+import com.tuneup.backend.model.Song;
+import com.tuneup.backend.service.SongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

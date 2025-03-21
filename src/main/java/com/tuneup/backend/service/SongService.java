@@ -1,7 +1,7 @@
-package com.tuneup.backend.services;
+package com.tuneup.backend.service;
 
-import com.tuneup.backend.models.Song;
-import com.tuneup.backend.repos.SongRepo;
+import com.tuneup.backend.model.Song;
+import com.tuneup.backend.repo.SongRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

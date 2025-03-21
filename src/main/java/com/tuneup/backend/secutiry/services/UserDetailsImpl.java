@@ -1,6 +1,6 @@
 package com.tuneup.backend.secutiry.services;
 
-import com.tuneup.backend.models.Users;
+import com.tuneup.backend.model.Users;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,16 +16,17 @@ public class UserDetailsImpl implements UserDetails {
         this.user = user;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
     }
 
     @Override
-    public String toString() {
-        return "UserDetailsImpl{" +
-                "user=" + user +
-                '}';
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("USER"));
     }
 
     @Override
@@ -56,5 +57,12 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDetailsImpl{" +
+                "user=" + user +
+                '}';
     }
 }
