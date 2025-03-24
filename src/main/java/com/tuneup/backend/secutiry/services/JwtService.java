@@ -18,13 +18,20 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    public String generateJwt(String username) {
+    @Value("${jwt.accessExpirationMs}")
+    private int jwtExpirationTime;
+
+    public String generateJwtFromUsername(String username) {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationTime))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String getUsernameFromJwt(String jwtToken) {
+        return Jwts.parser().verifyWith(key()).build().parseClaimsJws(jwtToken).getBody().getSubject();
     }
 
     private SecretKey key() {
@@ -53,7 +60,4 @@ public class JwtService {
         return false;
     }
 
-    public String getUsernameFromJwt(String jwtToken) {
-        return Jwts.parser().verifyWith(key()).build().parseClaimsJws(jwtToken).getBody().getSubject();
-    }
 }

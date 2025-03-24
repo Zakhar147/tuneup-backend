@@ -1,7 +1,7 @@
 package com.tuneup.backend.controller;
 
 import com.tuneup.backend.model.Users;
-import com.tuneup.backend.service.UserService;
+import com.tuneup.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

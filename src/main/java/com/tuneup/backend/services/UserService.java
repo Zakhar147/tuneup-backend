@@ -1,4 +1,4 @@
-package com.tuneup.backend.service;
+package com.tuneup.backend.services;
 
 import com.tuneup.backend.model.Users;
 import com.tuneup.backend.payload.request.LoginRequest;
@@ -9,11 +9,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.tuneup.backend.service;
+package com.tuneup.backend.services;
 
 import com.tuneup.backend.model.Song;
 import com.tuneup.backend.repo.SongRepo;
