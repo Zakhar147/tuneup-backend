@@ -9,7 +9,6 @@ import com.tuneup.backend.payload.request.TokenRefreshRequest;
 import com.tuneup.backend.payload.response.JwtResponse;
 import com.tuneup.backend.payload.response.MessageResponse;
 import com.tuneup.backend.payload.response.TokenRefreshResponse;
-import com.tuneup.backend.repo.RefreshTokenRepo;
 import com.tuneup.backend.secutiry.services.JwtService;
 import com.tuneup.backend.secutiry.services.RefreshTokenService;
 
@@ -71,9 +70,7 @@ public class AuthController {
         //TODO: Настроить правильно валидацию email
         //TODO: Подумать как красиво написать создание обьекта user(46 строка)
 
-        Users user = new Users(signupRequest.getUsername(),
-                signupRequest.getEmail(),
-                encoder.encode(signupRequest.getPassword()));
+        Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
 
         userService.createUser(user);
 

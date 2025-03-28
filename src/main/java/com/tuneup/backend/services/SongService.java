@@ -28,4 +28,8 @@ public class SongService {
     public void deleteSong(long id) {
         songRepository.deleteById(id);
     }
+
+    public Optional<Song> findById(Long id) {
+        return songRepository.findById(id);
+    }
 }

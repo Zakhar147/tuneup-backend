@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Table(name = "songs")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Song {
 
     @Id
@@ -21,4 +20,18 @@ public class Song {
 
     @Column(nullable = false)
     private String artist;
+
+    @Column(name = "tab_file_path")
+    private String tabFilePath;
+
+    public Song(String title, String artist, String tabFilePath) {
+        this.title = title;
+        this.artist = artist;
+        this.tabFilePath = tabFilePath;
+    }
+
+    public String getTabFilePath() {
+        return tabFilePath;
+    }
 }
+
