@@ -2,6 +2,7 @@ package com.tuneup.backend.secutiry.services;
 
 import com.tuneup.backend.exception.TokenRefreshException;
 import com.tuneup.backend.model.RefreshToken;
+import com.tuneup.backend.model.Users;
 import com.tuneup.backend.repo.RefreshTokenRepo;
 import com.tuneup.backend.repo.UserRepo;
 import jakarta.transaction.Transactional;
@@ -29,14 +30,17 @@ public class RefreshTokenService {
     }
 
     public RefreshToken createRefreshToken(Long userId) {
-        RefreshToken refreshToken = new RefreshToken();
+        Users user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        refreshToken.setUser(userRepo.findById(userId).get());
+        refreshTokenRepo.deleteByUserId(userId);
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
-        refreshToken = refreshTokenRepo.save(refreshToken);
-        return refreshToken;
+        return refreshTokenRepo.save(refreshToken);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
@@ -49,7 +53,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public int deleteByUserId(Long userId) {
-        return refreshTokenRepo.deleteByUser(userRepo.findById(userId).get());
+    public void deleteByUserId(Long userId) {
+        refreshTokenRepo.deleteByUserId(userId);
     }
 }

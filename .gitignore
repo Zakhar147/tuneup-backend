@@ -38,3 +38,4 @@ build/
 # Ignore application.yml (config file)
 application.yml
 
+tabs/

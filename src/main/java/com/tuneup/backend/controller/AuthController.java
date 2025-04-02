@@ -51,9 +51,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             String accessToken = jwtService.generateJwtFromUsername(verifiedResponse.getUsername());
-
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(verifiedResponse.getId());
-
 
             return ResponseEntity.ok(new JwtResponse(
                     accessToken,
@@ -66,9 +64,8 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-        //TODO: Добавить проаверку на сущ. польз. по username и по email.
-        //TODO: Настроить правильно валидацию email
-        //TODO: Подумать как красиво написать создание обьекта user(46 строка)
+        //TODO: Добавить проаверку на существ. польз. по username и по email.
+        //TODO: Настроить подтверждение почты
 
         Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
 

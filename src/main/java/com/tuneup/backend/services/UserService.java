@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,8 +31,11 @@ public class UserService {
     }
 
     public UserDetailsImpl verify(LoginRequest loginRequest) {
+        String login = loginRequest.getLogin();
+        String password = loginRequest.getPassword();
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(login,password));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

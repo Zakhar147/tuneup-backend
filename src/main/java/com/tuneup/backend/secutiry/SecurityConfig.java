@@ -57,27 +57,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager, AuthenticationProvider authenticationProvider) throws Exception {
-//
-//        //TODO: Убрать доступ к data без авторизации, оставить только логин и регистр
-//        return http
-//                .csrf(AbstractHttpConfigurer::disable)
-//
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(
-//                                "/api/auth/**",
-//                                "/api/songs/**"
-//                        ).permitAll()
-//                        .anyRequest().authenticated())
-//
-//                .httpBasic(Customizer.withDefaults())
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authenticationProvider(authenticationProvider())
-//                .addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-//                .build();
-//    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager, AuthenticationProvider authenticationProvider) throws Exception {
 
@@ -86,8 +65,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 👈 доступ разрешён ко всем маршрутам
-                )
+                        .requestMatchers(
+                                "/api/auth/**"
+                        ).permitAll()
+                        .anyRequest().authenticated())
 
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -95,5 +76,4 @@ public class SecurityConfig {
                 .addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
 }
