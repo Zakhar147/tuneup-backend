@@ -41,4 +41,12 @@ public class UserService {
 
         return authentication.getPrincipal() instanceof UserDetailsImpl ? (UserDetailsImpl) authentication.getPrincipal() : null;
     }
+
+    public boolean existsByEmail(String email) {
+        return userRepo.existsByEmail(email);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepo.existsByUsername(username);
+    }
 }

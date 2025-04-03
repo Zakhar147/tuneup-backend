@@ -64,11 +64,21 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-        //TODO: Добавить проаверку на существ. польз. по username и по email.
         //TODO: Настроить подтверждение почты
 
-        Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
+        if(userService.existsByEmail(signupRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Email already in use!"));
+        }
 
+        if(userService.existsByUsername(signupRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Username is already taken!"));
+        }
+
+        Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
         userService.createUser(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
