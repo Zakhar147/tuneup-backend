@@ -26,27 +26,4 @@ public class UserService {
         return userRepo.findAll();
     }
 
-    public void createUser(Users user) {
-        userRepo.save(user);
-    }
-
-    public UserDetailsImpl verify(LoginRequest loginRequest) {
-        String login = loginRequest.getLogin();
-        String password = loginRequest.getPassword();
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(login,password));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return authentication.getPrincipal() instanceof UserDetailsImpl ? (UserDetailsImpl) authentication.getPrincipal() : null;
-    }
-
-    public boolean existsByEmail(String email) {
-        return userRepo.existsByEmail(email);
-    }
-
-    public boolean existsByUsername(String username) {
-        return userRepo.existsByUsername(username);
-    }
 }

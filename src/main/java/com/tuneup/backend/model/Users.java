@@ -22,6 +22,9 @@ public class Users {
     @Column(unique = true, nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private boolean enabled = false;
+
     public Users(String username, String email, String password) {
         this.username = username;
         this.email = email;

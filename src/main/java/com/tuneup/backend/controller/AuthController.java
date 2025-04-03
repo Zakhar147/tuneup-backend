@@ -13,7 +13,7 @@ import com.tuneup.backend.secutiry.services.JwtService;
 import com.tuneup.backend.secutiry.services.RefreshTokenService;
 
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
-import com.tuneup.backend.services.UserService;
+import com.tuneup.backend.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,8 +26,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @CrossOrigin
 public class AuthController {
+    //TODO: создать endpoint /verify — POST, принимает код, ищет токен в базе.
 
-    private final UserService userService;
+    private final AuthService authService;
 
     private final JwtService jwtService;
 
@@ -37,15 +38,16 @@ public class AuthController {
     private RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder, JwtService jwtService) {
-        this.userService = userService;
+    public AuthController(AuthService authService, PasswordEncoder passwordEncoder, JwtService jwtService) {
+        this.authService = authService;
         this.encoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        UserDetailsImpl verifiedResponse = userService.verify(loginRequest);
+        //TODO: При логине пропускать только тех, кто enabled == true
+        UserDetailsImpl verifiedResponse = authService.verify(loginRequest);
 
         if (verifiedResponse == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -66,20 +68,20 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
         //TODO: Настроить подтверждение почты
 
-        if(userService.existsByEmail(signupRequest.getEmail())) {
+        if(authService.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Email already in use!"));
         }
 
-        if(userService.existsByUsername(signupRequest.getUsername())) {
+        if(authService.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Username is already taken!"));
         }
 
         Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
-        userService.createUser(user);
+        authService.registerUser(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
