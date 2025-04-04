@@ -2,11 +2,7 @@ package com.tuneup.backend.controller;
 
 import com.tuneup.backend.exception.TokenRefreshException;
 import com.tuneup.backend.model.RefreshToken;
-import com.tuneup.backend.model.Users;
-import com.tuneup.backend.payload.request.EmailRequest;
-import com.tuneup.backend.payload.request.LoginRequest;
-import com.tuneup.backend.payload.request.SignupRequest;
-import com.tuneup.backend.payload.request.TokenRefreshRequest;
+import com.tuneup.backend.payload.request.*;
 import com.tuneup.backend.payload.response.JwtResponse;
 import com.tuneup.backend.payload.response.MessageResponse;
 import com.tuneup.backend.payload.response.TokenRefreshResponse;
@@ -16,12 +12,10 @@ import com.tuneup.backend.secutiry.services.RefreshTokenService;
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
 import com.tuneup.backend.services.AuthService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -65,7 +59,7 @@ public class AuthController {
     }
 
     @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
         return refreshTokenService.findByToken(requestRefreshToken)
@@ -99,6 +93,13 @@ public class AuthController {
     @PostMapping("/registration/resendCode")
     public ResponseEntity<?> resendVerificationCode(@RequestBody EmailRequest emailRequest) {
         String result = authService.resendVerificationCode(emailRequest.getEmail());
+
+        return ResponseEntity.ok(new MessageResponse(result));
+    }
+
+    @PostMapping("/registration/verify")
+    public ResponseEntity<?> verifyUser(@RequestBody VerificationEmailRequest verificationRequest) {
+        String result = authService.verifyEmailCode(verificationRequest.getEmail(), verificationRequest.getVerificationCode());
 
         return ResponseEntity.ok(new MessageResponse(result));
     }

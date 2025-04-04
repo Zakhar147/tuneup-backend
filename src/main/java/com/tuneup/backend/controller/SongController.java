@@ -5,7 +5,6 @@ import com.tuneup.backend.payload.request.SongRequest;
 import com.tuneup.backend.services.FileStoreService;
 import com.tuneup.backend.services.SongService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,12 +17,10 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/songs")

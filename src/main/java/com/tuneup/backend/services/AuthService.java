@@ -47,7 +47,7 @@ public class AuthService {
         redisService.saveUnverifiedUser(redisKey, Map.of(
                 "username", userEntity.getUsername(),
                 "email", userEntity.getEmail(),
-                "passwordHash",userEntity.getPassword(),
+                "password",userEntity.getPassword(),
                 "verificationCode", verificationEmailCode
         ), 300);
 
@@ -67,15 +67,32 @@ public class AuthService {
         redisService.saveUnverifiedUser(redisKey, Map.of(
                 "username", userData.get("username"),
                 "email", userData.get("email"),
-                "passwordHash", userData.get("passwordHash"),
+                "password", userData.get("password"),
                 "verificationCode", verificationEmailCode
         ), 300);
 
         return sendVerificationEmailCode(email, verificationEmailCode);
     }
 
-    public Users createUserInDatabase(Users user) {
-        return userRepo.save(user);
+    public String verifyEmailCode(String email, String code) {
+        String redisKey = "user:verification:" + email;
+
+        if (!redisService.exists(redisKey)) {
+            return "Verification code expired or not found";
+        }
+
+        Map<String, String> userData = redisService.getUserData(redisKey);
+        String storedCode = userData.get("verificationCode");
+
+        if (!storedCode.equals(code)) {
+            return "Incorrect verification code";
+        }
+
+        Users user = new Users(userData.get("username"), userData.get("email"), userData.get("password"));
+        userRepo.save(user);
+        redisService.delete(redisKey);
+
+        return "User verified and registered successfully";
     }
 
     public String sendVerificationEmailCode(String email, String verificationCode) {
