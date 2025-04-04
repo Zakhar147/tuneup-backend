@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 
-@Entity(name = "refreshtoken")
+@Entity
 @Getter
 @Setter
 public class RefreshToken {

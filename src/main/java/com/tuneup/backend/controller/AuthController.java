@@ -32,15 +32,13 @@ public class AuthController {
 
     private final JwtService jwtService;
 
-    private final PasswordEncoder encoder;
 
     @Autowired
     private RefreshTokenService refreshTokenService;
 
     @Autowired
-    public AuthController(AuthService authService, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthController(AuthService authService, JwtService jwtService) {
         this.authService = authService;
-        this.encoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
@@ -66,7 +64,8 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-        //TODO: Настроить подтверждение почты
+        //TODO: ❗ Нет возможности повторно отправить код подтверждения, если пользователь потерял его.
+        //TODO: Написать метод который будет удалять , спустя время , с базы тез юзеров которые долго не верифицируют свою почту , чтобы не занимало место
 
         if(authService.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity
@@ -80,10 +79,14 @@ public class AuthController {
                     .body(new MessageResponse("Username is already taken!"));
         }
 
-        Users user = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
-        authService.registerUser(user);
+        authService.createUnverifiedUser(signupRequest);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+
+        //TODO: отправить письмо
+
+
+//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("No errors found!"));
     }
 
     @PostMapping("/refreshtoken")
