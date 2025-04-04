@@ -3,6 +3,7 @@ package com.tuneup.backend.controller;
 import com.tuneup.backend.exception.TokenRefreshException;
 import com.tuneup.backend.model.RefreshToken;
 import com.tuneup.backend.model.Users;
+import com.tuneup.backend.payload.request.EmailRequest;
 import com.tuneup.backend.payload.request.LoginRequest;
 import com.tuneup.backend.payload.request.SignupRequest;
 import com.tuneup.backend.payload.request.TokenRefreshRequest;
@@ -80,30 +81,24 @@ public class AuthController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
-        //TODO: ❗ Нет возможности повторно отправить код подтверждения, если пользователь потерял его.
-        //TODO: Написать метод который будет удалять , спустя время , с базы тез юзеров которые долго не верифицируют свою почту , чтобы не занимало место
-
         if(authService.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Email already in use!"));
         }
-
         if(authService.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Username is already taken!"));
         }
-
         String result = authService.createUnverifiedUser(signupRequest);
 
-        //TODO: отправить письмо
         return ResponseEntity.ok(new MessageResponse(result));
     }
 
-    @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
-        String result = authService.resendVerificationEmailCode(email);
+    @PostMapping("/registration/resendCode")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody EmailRequest emailRequest) {
+        String result = authService.resendVerificationCode(emailRequest.getEmail());
 
         return ResponseEntity.ok(new MessageResponse(result));
     }

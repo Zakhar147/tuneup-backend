@@ -1,12 +1,11 @@
 package com.tuneup.backend.services;
 
 import com.tuneup.backend.model.Users;
-import com.tuneup.backend.model.VerificationEmailToken;
 import com.tuneup.backend.payload.request.LoginRequest;
 import com.tuneup.backend.payload.request.SignupRequest;
 import com.tuneup.backend.repo.UserRepo;
-import com.tuneup.backend.repo.VerificationEmailTokenRepo;
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
+import io.lettuce.core.api.sync.RedisCommands;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,59 +28,54 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final UserRepo userRepo;
-    private final VerificationEmailTokenRepo verificationEmailTokenRepo;
+
     private final EmailService emailService;
+    private final RedisService redisService;
 
     private final PasswordEncoder encoder;
 
+
     public String createUnverifiedUser(SignupRequest signupRequest) {
-        Users existingUser = userRepo.findByEmail(signupRequest.getEmail()).orElse(null);
+        Users userEntity = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
+        String verificationEmailCode = generateNumericCode();
+        String redisKey = "user:verification:" + signupRequest.getEmail();
 
-        if (existingUser != null) {
-            verificationEmailTokenRepo.deleteByUser(existingUser);
-            VerificationEmailToken verificationEmailCode = createVerificationEmailCodeForUser(existingUser);
-
-            return sendVerificationEmailCode(existingUser.getEmail(), verificationEmailCode.getToken());
-
-        } else {
-            Users userEntity = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
-            Users user = createUserInDatabase(userEntity);
-            VerificationEmailToken verificationEmailCode = createVerificationEmailCodeForUser(user);
-
-            return sendVerificationEmailCode(user.getEmail(), verificationEmailCode.getToken());
+        if (redisService.exists(redisKey)) {
+            redisService.delete(redisKey);
         }
 
+        redisService.saveUnverifiedUser(redisKey, Map.of(
+                "username", userEntity.getUsername(),
+                "email", userEntity.getEmail(),
+                "passwordHash",userEntity.getPassword(),
+                "verificationCode", verificationEmailCode
+        ), 300);
+
+        return sendVerificationEmailCode(userEntity.getEmail(), verificationEmailCode);
+    }
+
+    public String resendVerificationCode(String email) {
+        String redisKey = "user:verification:" + email;
+        if (!redisService.exists(redisKey)) {
+            return "No unverified user found for this email.";
+        }
+
+        Map<String, String> userData = redisService.getUserData(redisKey);
+        String verificationEmailCode = generateNumericCode();
+        redisService.delete(redisKey);
+
+        redisService.saveUnverifiedUser(redisKey, Map.of(
+                "username", userData.get("username"),
+                "email", userData.get("email"),
+                "passwordHash", userData.get("passwordHash"),
+                "verificationCode", verificationEmailCode
+        ), 300);
+
+        return sendVerificationEmailCode(email, verificationEmailCode);
     }
 
     public Users createUserInDatabase(Users user) {
         return userRepo.save(user);
-    }
-
-    public VerificationEmailToken createVerificationEmailCodeForUser (Users user) {
-        String verificationToken = generateNumericCode();
-        LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(1);
-
-        VerificationEmailToken verificationEmailToken = new VerificationEmailToken(user, verificationToken, expiryDate);
-        return verificationEmailTokenRepo.save(verificationEmailToken);
-    }
-
-    public String resendVerificationEmailCode(String email) {
-        Optional<Users> optionalUser = userRepo.findByEmail(email);
-
-        if (optionalUser.isEmpty()) {
-            return "User not found";
-        }
-
-        Users user = optionalUser.get();
-        if (user.isEnabled()) {
-            return "User is already verified";
-        }
-
-        verificationEmailTokenRepo.deleteByUser(user);
-        VerificationEmailToken verificationEmailCode = createVerificationEmailCodeForUser(user);
-
-
-        return sendVerificationEmailCode(user.getEmail(), verificationEmailCode.getToken());
     }
 
     public String sendVerificationEmailCode(String email, String verificationCode) {
@@ -134,6 +127,5 @@ public class AuthService {
         int code = (int)(Math.random() * 90000000) + 10000000;
         return String.valueOf(code);
     }
-
 
 }
