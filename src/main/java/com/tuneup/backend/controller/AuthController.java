@@ -15,6 +15,7 @@ import com.tuneup.backend.secutiry.services.RefreshTokenService;
 import com.tuneup.backend.secutiry.services.UserDetailsImpl;
 import com.tuneup.backend.services.AuthService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,21 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtService.generateJwtFromUsername(user.getUsername());
+                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
+    }
+
     @PostMapping("/registration")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
         //TODO: ❗ Нет возможности повторно отправить код подтверждения, если пользователь потерял его.
@@ -79,29 +95,17 @@ public class AuthController {
                     .body(new MessageResponse("Username is already taken!"));
         }
 
-        authService.createUnverifiedUser(signupRequest);
-
+        String result = authService.createUnverifiedUser(signupRequest);
 
         //TODO: отправить письмо
-
-
-//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-        return ResponseEntity.ok(new MessageResponse("No errors found!"));
+        return ResponseEntity.ok(new MessageResponse(result));
     }
 
-    @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
+    @PostMapping("/resend")
+    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
+        String result = authService.resendVerificationEmailCode(email);
 
-        return refreshTokenService.findByToken(requestRefreshToken)
-                .map(refreshTokenService::verifyExpiration)
-                .map(RefreshToken::getUser)
-                .map(user -> {
-                    String token = jwtService.generateJwtFromUsername(user.getUsername());
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
-                })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
-                        "Refresh token is not in database!"));
+        return ResponseEntity.ok(new MessageResponse(result));
     }
 
     @PostMapping("/logout")
