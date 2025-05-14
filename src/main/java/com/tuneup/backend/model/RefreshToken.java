@@ -23,4 +23,14 @@ public class RefreshToken {
 
     @Column(nullable = false)
     private Instant expiryDate;
+
+    @Override
+    public String toString() {
+        return "RefreshToken{" +
+                "id=" + id +
+                ", user=" + user +
+                ", token='" + token + '\'' +
+                ", expiryDate=" + expiryDate +
+                '}';
+    }
 }

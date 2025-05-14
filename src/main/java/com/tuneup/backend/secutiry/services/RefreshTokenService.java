@@ -8,6 +8,7 @@ import com.tuneup.backend.repo.UserRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,14 +34,22 @@ public class RefreshTokenService {
         Users user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        refreshTokenRepo.deleteByUserId(userId);
-
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
         return refreshTokenRepo.save(refreshToken);
+    }
+
+    public ResponseCookie createRefreshTokenCookie(String refreshToken) {
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/api/auth")
+                .maxAge(refreshTokenDurationMs / 1000)
+                .sameSite("Lax")
+                .build();
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
