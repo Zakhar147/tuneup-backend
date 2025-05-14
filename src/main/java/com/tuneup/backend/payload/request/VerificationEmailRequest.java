@@ -19,4 +19,12 @@ public class VerificationEmailRequest {
     public void setVerificationCode(String verificationCode) {
         this.verificationCode = verificationCode;
     }
+
+    @Override
+    public String toString() {
+        return "VerificationEmailRequest{" +
+                "email='" + email + '\'' +
+                ", verificationCode='" + verificationCode + '\'' +
+                '}';
+    }
 }

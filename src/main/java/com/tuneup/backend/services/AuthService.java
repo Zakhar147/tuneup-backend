@@ -22,8 +22,6 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
-    //TODO: метод verifyEmailToken(String token)
-    //TODO: переименовать verificationToken HA verificationCode
 
     private final AuthenticationManager authenticationManager;
 
@@ -33,7 +31,6 @@ public class AuthService {
     private final RedisService redisService;
 
     private final PasswordEncoder encoder;
-
 
     public String createUnverifiedUser(SignupRequest signupRequest) {
         Users userEntity = signupRequest.toEntity(encoder.encode(signupRequest.getPassword()));
@@ -55,7 +52,10 @@ public class AuthService {
     }
 
     public String resendVerificationCode(String email) {
+        log.info("Resending code to email: {}", email);
+
         String redisKey = "user:verification:" + email;
+
         if (!redisService.exists(redisKey)) {
             return "No unverified user found for this email.";
         }
