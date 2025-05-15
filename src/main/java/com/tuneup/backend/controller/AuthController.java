@@ -47,6 +47,8 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse(result));
     }
 
+
+    //TODO: добавить в энд поинт /registration
     @PostMapping("/check-username")
     public ResponseEntity<?> checkUsername(@RequestBody CheckUsernameRequest checkUsernameRequest) {
         if(authService.existsByUsername(checkUsernameRequest.getUsername())) {
@@ -58,6 +60,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("OK"));
     }
 
+    //TODO: добавить в энд поинт /registration
     @PostMapping("/check-email")
     public ResponseEntity<?> checkUser(@RequestBody CheckEmailRequest checkUserRequest) {
         if(authService.existsByEmail(checkUserRequest.getEmail())) {
@@ -71,10 +74,13 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        log.info("login request {}", loginRequest.toString());
         UserDetailsImpl verifiedResponse = authService.verify(loginRequest);
 
         if (verifiedResponse == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(new MessageResponse("Invalid login or password"));
         } else {
             String accessToken = jwtService.generateJwtFromUsername(verifiedResponse.getUsername());
             refreshTokenService.deleteByUserId(verifiedResponse.getId());
@@ -88,6 +94,22 @@ public class AuthController {
                     verifiedResponse.getUsername(),
                     verifiedResponse.getEmail()));
         }
+    }
+
+    //TODO: добавить в энд поинт /login
+    @PostMapping("/check-login")
+    public ResponseEntity<?> checkLoginExists(@RequestBody CheckLoginRequest  loginRequest) {
+        String login = loginRequest.getLogin();
+
+        boolean exists = authService.existsByUsername(login) || authService.existsByEmail(login);
+
+        if(!exists) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Username or email does not exist"));
+        }
+
+        return ResponseEntity.ok(new MessageResponse("OK"));
     }
 
     @PostMapping("/refresh-access-token")

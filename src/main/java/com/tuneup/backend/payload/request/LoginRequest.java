@@ -12,4 +12,12 @@ public class LoginRequest {
 
     @NotBlank
     private String password;
+
+    @Override
+    public String toString() {
+        return "LoginRequest{" +
+                "login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

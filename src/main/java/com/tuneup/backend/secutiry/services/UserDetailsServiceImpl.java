@@ -16,6 +16,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
+        if (login == null || login.isBlank()) {
+            throw new UsernameNotFoundException("Login is null or empty");
+        }
+
         Users user = userRepo.findByUsername(login)
                 .orElseGet(() -> userRepo.findByEmail(login)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found")));

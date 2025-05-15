@@ -65,4 +65,9 @@ public class RefreshTokenService {
     public void deleteByUserId(Long userId) {
         refreshTokenRepo.deleteByUserId(userId);
     }
+
+    @Transactional
+    public void delete(RefreshToken token) {
+        refreshTokenRepo.delete(token);
+    }
 }
