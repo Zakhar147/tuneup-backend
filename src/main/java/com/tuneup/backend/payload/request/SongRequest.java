@@ -9,8 +9,9 @@ import lombok.Setter;
 public class SongRequest {
     private String title;
     private String artist;
+    private String textAndChords;
 
     public Song toEntity(String filePath) {
-        return new Song(title, artist, filePath);
+        return new Song(title, artist, filePath, textAndChords);
     }
 }
